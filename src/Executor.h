@@ -1,6 +1,6 @@
 #pragma once
 
-#include "QueueList.h"
+#include "LinkedList.h"
 #include "TimeUnit.h"
 #include "Runnable.h"
 
@@ -15,7 +15,7 @@ public:
                            TimeUnit unit);
 
 private:
-  QueueList<Runnable*> commands;
+  LinkedList<Runnable*> commands;
 };
 
 extern Executor executor;

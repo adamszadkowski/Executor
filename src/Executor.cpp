@@ -4,12 +4,12 @@
 #include "FixedRateTask.h"
 
 void Executor::loop() {
-  Runnable* c = commands.pop();
+  Runnable* c = commands.shift();
   c->run();
 }
 
 void Executor::execute(Runnable& command) {
-  commands.push(&command);
+  commands.add(&command);
 }
 
 class CyclicTask: public Runnable {
@@ -29,7 +29,7 @@ private:
 };
 
 void Executor::executeInCycle(Runnable& command) {
-  commands.push(new CyclicTask(*this, command));
+  execute(*new CyclicTask(*this, command));
 }
 
 class FirstRun: public Runnable {
@@ -56,14 +56,16 @@ void Executor::scheduleAtFixedRate(Runnable& command,
                                    TimeUnit unit) {
   FixedRateTask* t = new FixedRateTask(*this, command, period, unit);
 
-  commands.push(new DelayedTask(*this,
+  execute(*new DelayedTask(*this,
                                 *new FirstRun(*this, *t, command),
                                 initialDelay,
                                 unit));
 }
 
-void loop() {
-  executor.loop();
+extern "C" {
+  void loop() {
+    executor.loop();
+  }
 }
 
 Executor executor;

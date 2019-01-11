@@ -1,0 +1,23 @@
+{
+    "name": "Executor",
+    "keywords": "executor, task, runnable",
+    "description": "Executor allows to execute tasks in queue. If tasks are small enough it can be treated as a way to \"parallelize\" tasks.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/adamszadkowski/Executor.git"
+    },
+    "authors": [
+        {
+            "name": "Adam Szadkowski",
+            "email": "adam@szadkowski.info",
+            "url": "http://www.szdadkowski.info",
+            "maintainer": true
+        }
+    ],
+    "dependencies": {
+        "name": "LinkedList",
+        "authors": "Ivan Seidel"
+    },
+    "version": "0.1.0",
+    "platforms": "*"
+}
