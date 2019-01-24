@@ -1,8 +1,10 @@
 #include "NullTask.h"
 
-NullTask::NullTask() {}
+NullTask::NullTask() {
+}
 
-void NullTask::run() {}
+void NullTask::run() {
+}
 
 NullTask& NullTask::getInstance() {
   static NullTask instance;

@@ -4,68 +4,56 @@
 #include "FixedRateTask.h"
 
 void Executor::loop() {
-  Runnable* c = commands.shift();
-  c->run();
+  Command c = commands.shift();
+  c();
+}
+
+void Executor::execute(Command command) {
+  commands.add(command);
 }
 
 void Executor::execute(Runnable& command) {
-  commands.add(&command);
+  commands.add([&command]() { command.run(); });
 }
 
-class CyclicTask: public Runnable {
-public:
-  CyclicTask(Executor& executor, Runnable& command)
-      : executor(executor), command(command) {
-  }
-
-  void run() override {
-    command.run();
-    executor.execute(*this);
-  }
-
-private:
-  Executor& executor;
-  Runnable& command;
-};
+void Executor::executeInCycle(Command command) {
+  execute([command, this]() {
+    command();
+    execute(command);
+  });
+}
 
 void Executor::executeInCycle(Runnable& command) {
-  execute(*new CyclicTask(*this, command));
+  executeInCycle([&command]() { command.run(); });
 }
 
-class FirstRun: public Runnable {
-public:
-  FirstRun(Executor& executor, Runnable& task, Runnable& command)
-      : executor(executor), task(task), command(command) {
-  }
+void Executor::executeWithDelay(Command command, unsigned long initialDelay, TimeUnit unit) {
+  execute(*new DelayedTask(*this, command, initialDelay, unit));
+}
 
-  void run() override {
-    command.run();
-    executor.execute(task);
-    delete this;
-  }
+void Executor::executeWithDelay(Runnable& command, unsigned long initialDelay, TimeUnit unit) {
+  executeWithDelay([&command]() { command.run(); }, initialDelay, unit);
+}
 
-private:
-  Executor& executor;
-  Runnable& task;
-  Runnable& command;
-};
-
-void Executor::scheduleAtFixedRate(Runnable& command,
-                                   unsigned long initialDelay,
-                                   unsigned long period,
-                                   TimeUnit unit) {
-  FixedRateTask* t = new FixedRateTask(*this, command, period, unit);
+void Executor::scheduleAtFixedRate(Command command, unsigned long initialDelay, unsigned long period, TimeUnit unit) {
+  FixedRateTask* task = new FixedRateTask(*this, command, period, unit);
 
   execute(*new DelayedTask(*this,
-                                *new FirstRun(*this, *t, command),
-                                initialDelay,
-                                unit));
+                           [command, task, this]() {
+                             command();
+                             execute(*task);
+                           },
+                           initialDelay, unit));
+}
+
+void Executor::scheduleAtFixedRate(Runnable& command, unsigned long initialDelay, unsigned long period, TimeUnit unit) {
+  scheduleAtFixedRate([&command]() { command.run(); }, initialDelay, period, unit);
 }
 
 extern "C" {
-  void loop() {
-    executor.loop();
-  }
+void loop() {
+  executor.loop();
+}
 }
 
 Executor executor;

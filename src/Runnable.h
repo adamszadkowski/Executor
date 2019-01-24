@@ -1,7 +1,7 @@
 #pragma once
 
 class Runnable {
-public:
+ public:
   virtual ~Runnable() {
   }
 

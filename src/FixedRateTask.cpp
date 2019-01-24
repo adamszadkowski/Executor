@@ -1,6 +1,6 @@
 #include "FixedRateTask.h"
 
-FixedRateTask::FixedRateTask(Executor& executor, Runnable& command, unsigned long period, TimeUnit unit)
+FixedRateTask::FixedRateTask(Executor& executor, Command command, unsigned long period, TimeUnit unit)
     : DelayedTask(executor, command, period, unit) {
 }
 
@@ -9,7 +9,7 @@ void FixedRateTask::run() {
 
   if (t >= delay && t - delay >= lastRun) {
     lastRun = t;
-    command.run();
+    command();
   }
 
   executor.execute(*this);
