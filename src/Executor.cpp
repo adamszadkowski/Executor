@@ -19,7 +19,7 @@ void Executor::execute(Runnable& command) {
 void Executor::executeInCycle(Command command) {
   execute([command, this]() {
     command();
-    execute(command);
+    executeInCycle(command);
   });
 }
 
