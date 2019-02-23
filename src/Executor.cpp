@@ -36,12 +36,10 @@ void Executor::executeWithDelay(Runnable& command, unsigned long initialDelay, T
 }
 
 void Executor::scheduleAtFixedRate(Command command, unsigned long initialDelay, unsigned long period, TimeUnit unit) {
-  FixedRateTask* task = new FixedRateTask(*this, command, period, unit);
-
   execute(*new DelayedTask(*this,
-                           [command, task, this]() {
+                           [command, period, unit, this]() {
                              command();
-                             execute(*task);
+                             execute(*new FixedRateTask(*this, command, period, unit));
                            },
                            initialDelay, unit));
 }
